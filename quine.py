@@ -86,9 +86,8 @@ def verificaPrimosImplicantes(eqBin):
 			return primo
 		eqBin = list(set(temp))
 
-
-
-
+#recebe entrada em forma de SOP
+print('Digite a equacao (SOP):')
 entrada = input()
 for i in range (0,15):
     aux = entrada
