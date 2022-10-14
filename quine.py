@@ -32,22 +32,28 @@ def listaMintermos(vBin,tam):
         bin2dec(aux[i])
     print('Mintermos:',dec)
 
-def montarTabela(mint):
-    linha = 0
-    col = 0
-    tab = [[0,4,12,8],
-           [1,5,13,9],
-           [3,7,15,11],
-           [2,6,14,10]]          
+def associa_mintermos(kmap,mint):
+    indice = [[0, 4, 12, 8], [1, 5, 13, 9], [3, 7, 15, 11], [2, 6, 14, 10]]
+    for i in mint:
+        if i in indice[0]:
+            kmap[0][indice[0].index(i)] = '1'
+        elif i in indice[1]:
+            kmap[1][indice[1].index(i)] = '1'
+        elif i in indice[2]:
+            kmap[2][indice[2].index(i)] = '1'
+        else:
+            kmap[3][indice[3].index(i)] = '1'
+    return kmap
 
-    for linha in range(0,4):
-       # print('linha',linha)
-        #print('mint',mint)
-        #if linha == mint:
-           # print('teste')
-            #tab[linha]= 1
-        print(tab[linha])
-   # print('\n',tab)
+def imprimeMapa(kmap):
+    for i in kmap:
+        print("-" * 17)
+        print('| ', end='')
+        for j in i:
+            print(j, end=' | ')
+        print('')
+    print("-" * 17)    
+
 
 def agrupaUns(tabela,tam):
     grupo = [[] for i in range(tam+1)]
@@ -86,8 +92,10 @@ def verificaPrimosImplicantes(eqBin):
 			return primo
 		eqBin = list(set(temp))
 
-#recebe entrada em forma de SOP
-print('Digite a equacao (SOP):')
+
+
+print('Entre com a equação(SOP): ')
+#Recebe a equação em forma de SOP
 entrada = input()
 for i in range (0,15):
     aux = entrada
@@ -113,11 +121,22 @@ for i in range (0,15):
     aux = aux.split('+')
 
 bin.append(aux)
+print('Representacao binaria:')
 print(bin)
+
+
 nMint = len(aux)
+#print('Numero de mintermos:',nMint)
 
 listaMintermos(bin,nMint)
+
+#print('dec:',dec)
 
 primo_implicante=verificaPrimosImplicantes(bin[0])
 print('primos implicantes:')
 print(primo_implicante)
+
+print('\n')
+kmap = [['0', '0', '0', '0'], ['0', '0', '0', '0'], ['0', '0', '0', '0'], ['0', '0', '0', '0']]
+#print(kmap)
+imprimeMapa(associa_mintermos(kmap,dec))
