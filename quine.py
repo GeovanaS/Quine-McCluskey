@@ -13,6 +13,9 @@ essentialPrimes =[]
 
 #numero de mintermos
 nMint = 0
+#numero de literais
+nLiterais = 0
+
 
 # Converte equacao binaria para decimal
 def bin2dec(vBin):
@@ -96,34 +99,43 @@ def entradaSOP(entrada):
 
 # Converte o binario para o formato de soma de produto
 def binario_para_equacao(selectedPrimes):
+    global nLiterais
     eq = ''
     if(selectedPrimes[0]=='1'):
         eq += str("A")
+        nLiterais = nLiterais + 1
     elif(selectedPrimes[0]=='0'):
         eq += str("!A")
+        nLiterais = nLiterais + 1
     elif(selectedPrimes[0]=='_'):
         eq+=str("")
 
     if(selectedPrimes[1]=='1'):
         eq+=str("B")
+        nLiterais = nLiterais + 1
     elif(selectedPrimes[1]=='0'):
         eq+=str("!B")
+        nLiterais = nLiterais + 1
     elif(selectedPrimes[1]=='_'):
         eq+=str("")
 
     if(selectedPrimes[2]=='1'):
         eq+=str("C")
+        nLiterais = nLiterais + 1
     elif(selectedPrimes[2]=='0'):
         eq+=str("!C")
+        nLiterais = nLiterais + 1
     elif(selectedPrimes[2]=='_'):
         eq+=str("")
 
     if(selectedPrimes[3]=='1'):
         eq+=str("D")
+        nLiterais = nLiterais + 1
     elif(selectedPrimes[3]=='0'):
         eq+=str("!D")
+        nLiterais = nLiterais + 1
     elif(selectedPrimes[3]=='_'):
-        eq+=str("")        
+        eq+=str("")
 
     return eq
 
@@ -333,12 +345,15 @@ def main():
            epi.append(i[1])
 
 
-       #ep = ['0000_','0_01','011_']
+
        solucao = ""
        solucao += binario_para_equacao(epi[0])
+       
        for x in range(1,len(epi)):
            solucao += " + " + binario_para_equacao(epi[x])
-       print(solucao)
+
+       print("Saida: ",solucao," / ", nLiterais,"Literais")
+
 
     elif op == "2":
        print("Digite a tabela verdade da equação separando cada linha por um espaço:")
