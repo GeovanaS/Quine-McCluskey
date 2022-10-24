@@ -1,15 +1,14 @@
 # Trabalho 1 - Ferramenta de CAD 
+# Algoritmo de Quine-McCluskey para solucionar mapas de Karnaugh de 4 variaveis
 
 #Exemplo entrada: !A*!B*!C*!D + !A*!B*!C*D + !A*B*!C*D + !A*B*C*!D + !A*B*C*D
 
 
 # Lists
 vBin = []
-vDec = []
 tabelaV = []
 epi = []
-
-essentialPrimes =[]
+selected_primes =[]
 
 #numero de mintermos
 nMint = 0
@@ -20,11 +19,12 @@ nLiterais = 0
 # Converte equacao binaria para decimal
 def bin2dec(vBin):
     soma = 0
-    n = len(vBin)
+    n = len(vBin) 
     for i,d in enumerate(vBin):
         if d == '1':
             soma += 2 ** (n-i-1)
-    vDec.append(soma)
+    if n > 4:
+        soma = int(soma/2)    
     return soma
 
 # Lista os mintermos da equacao
@@ -42,6 +42,7 @@ def agrupaUns(binario, nVar):
     grupo2 = []
     grupo3 = []
     grupo4 = []
+
     for b in binario:
         cont = 0
         for digito in b:
@@ -97,7 +98,7 @@ def entradaSOP(entrada):
     return aux
 
 
-# Converte o binario para o formato de soma de produto
+# Converte o binario para o formato de soma de produto 
 def binario_para_equacao(selectedPrimes):
     global nLiterais
     eq = ''
@@ -139,89 +140,76 @@ def binario_para_equacao(selectedPrimes):
 
     return eq
 
-##############################
-#def dec(x):  # bin>>dec converter
-#   return int(x, 2)
 
-# Verifica se a diferenca entre as equacoes diferem por um bit    
-def isBitShift_1(eq1, eq2):      
-    for i in range(len(eq1)):
-        if eq1[i] == '_':
-            if eq1[i] != eq2[i]:
+# Funcao auxiliar que compara duas strings    
+def compara_strings(str1, str2): 
+    for i in range(len(str1)):
+        if str1[i] == '_':
+            if str1[i] != str2[i]:
                 return False
-    n = eq1.replace('_', '')
-    m = eq2.replace('_', '')
     cont = 0
-    for i in range(len(n)):
-        if n[i] != m[i]:
+    for i in range(len(str1)):
+        if str1[i] != str2[i]:
             cont+=1
-    if cont!=1:
+    if cont > 1:
         return False
     return True
 
 
 # Gera os primos implicantes
-def PI(eq1,eq2):
+def geraPrimos(str1,str2):
     saida = ''
-    for i in range(len(eq1)):
-        if eq1[i] == eq2[i]:
-            saida += eq1[i]
+    for i in range(len(str1)):
+        if str1[i] == str2[i]:
+            saida += str1[i]
         else:
             saida += '_'
     return saida
 
 
-# Gera os selected primes    
-def selectedPrimes(eq1,eq2):
-    global essentialPrimes
-    for i in eq1:
-        if i not in eq2 and i not in essentialPrimes:
-            essentialPrimes.append(i)
-#################################
+# Gera o conjunto minimo de primos(selected primes)    
+def selectedPrimes(str1,str2):
+    global selected_primes
+    for i in str1:
+        if i not in str2 and i not in selected_primes:
+            selected_primes.append(i)
+
+
 
 # Função main 
 def main():
     op = input("Escolha a opção de entrada\n1-SOP\n2-Tabela Verdade\n3-Sair\n")
     if op == "1":
        print("Digite a equação no formato SOP:")  
-       entrada = input()
-       aux = entradaSOP(entrada)
-       vBin.append(aux)
-       print("Equação em binario:",aux)
-       nMint = len(aux)
+       entrada = input() #le a entrada do usuario
+       aux = entradaSOP(entrada) # armazena a expressao em binario
+       #vBin.append(aux)
+       print("Equação em binario:\n",aux)
+       nMint = len(aux) #numero de mintermos
+       #print(nMint)
        minterms = listaMintermos(vBin,nMint,aux)
-       print("Mintermos:",minterms)
-       grupos = agrupaUns(aux,nMint-1)
-       print("Agrupamento:",grupos)
+       print("Mintermos:\n",minterms)
+       grupos = agrupaUns(aux,4)
+       print("Agrupamento:\n",grupos)
        
        n = nMint-1
 
        group1 = []
        for i in range(n+1):
            group1.append([])
-
-       #minBin = []
-       #for i in minterms:
-        #   eqBin = bin(i)[2:]
-         #  if eqBin == n:
-          #    continue
-          # else:
-           #   while len(eqBin) < n:
-            #    eqBin = '0' + eqBin
-        
-         #  minBin.append(eqBin)
-
-      # print('minbin:',minBin)  
-    
+       
        #agrupa pelo numero de 1's
        for i in aux:
            group1[i.count('1')].append(i)  
 
-       print('group1:',group1)    
+      #print('group1:\n',group1)    
 
        minBin = []
        minBin2 = []
        group2 = []
+       primos = []
+
+
        for i in range(n):
            group2.append([])
 
@@ -232,26 +220,31 @@ def main():
                    if j not in minBin:minBin.append([bin2dec(j),j])
                    if bin2dec(i) > bin2dec(j):
                       continue
-                   elif isBitShift_1(i,j):
+                   elif compara_strings(i,j):
                         if i not in minBin2: minBin2.append([bin2dec(i),i])
                         if j not in minBin2: minBin2.append([bin2dec(i),i])
-                        group2[group1.index(group)].append([[bin2dec(i), bin2dec(j)], PI(i,j)])
+                        primos.append(geraPrimos(i,j))
+                        group2[group1.index(group)].append([[bin2dec(i), bin2dec(j)], geraPrimos(i,j)])
        
-       for i in group2:
+       #print('primos:',primos)
+       #print('group1:',group1) agrupamento por 1's
+       #print('group2:',group2) #mintemos x primos implicantes
+       for i in group2: 
           if i == []:
             group2.remove([])
 
+      # print(group2)
+      
        print('Tabela de Cobertura (Mintermos x Primos Implicantes):') 
        for i in group2:
            print(i)
 
        selectedPrimes(minBin,minBin2)
-       #print(essentialPrimes)
        
-       while True:
+       while True:  #Gera implicantes primos essenciais
             if len(group2) == 1:
                 for i in group2[0]:
-                    essentialPrimes.append(i)
+                    selected_primes.append(i)
                 break
 
             group1 = group2
@@ -267,17 +260,18 @@ def main():
                     if j[-1] not in minBin: minBin.append(j)
                     for k in group1[group1.index(i) + 1]:
                         if k[-1] not in minBin: minBin.append(k)
-                        if isBitShift_1(j[-1], k[-1]):
+                        if compara_strings(j[-1], k[-1]):
                             if j[-1] not in minBin2: minBin2.append(j)
                             if k[-1] not in minBin2: minBin2.append(k)
-                            group2[group1.index(i)].append([j[0] + k[0], PI(j[-1], k[-1])])
+                            group2[group1.index(i)].append([j[0] + k[0], geraPrimos(j[-1], k[-1])])
+
 
             for i in group2:
                 if i == []:
                     group2.remove([])
             
             selectedPrimes(minBin,minBin2)
-           # print(essentialPrimes)
+           # print(selected_primes)
             if len(group2) == 0:
                 break
             if len(group2[0]) == 0:
@@ -289,27 +283,25 @@ def main():
 
        filtro = []
 
-       for i in essentialPrimes:
+       for i in selected_primes:
            x = i[0]
            if type(x) is list:
-              x.sort()
+              x.sort() #ordena lista
            y = [x,i[1]]
            if y not in filtro:
               filtro.append(y)
 
-       #print('filtro:',filtro)
 
-       copylist = minterms.copy()
-       copy2 = filtro.copy()
-       for i in copy2:
+       lista1 = minterms.copy() 
+       lista2 = filtro.copy()  
+       for i in lista2:
            if type(i[0]) is int:
-                filtro[copy2.index(i)][0] = [filtro[copy2.index(i)][0]]
+                filtro[lista2.index(i)][0] = [filtro[lista2.index(i)][0]]
 
-       #print(filtro)
 
-       chosen = []
+       essentialPrime = []
 
-       for i in copylist:
+       for i in lista1:
            cont = 0
            eq = []
            for j in filtro:
@@ -317,17 +309,18 @@ def main():
                   cont+=1
                   eq.append(j)
            if cont==1:
-              if eq[0] not in chosen: chosen.append(eq[0])
+              if eq[0] not in essentialPrime: essentialPrime.append(eq[0])
               
               for a in eq[0][0]:
                   if a in minterms: minterms.remove(a)
-        
-       for i in chosen: 
+
+       print('Essential Prime:',essentialPrime)
+       for i in essentialPrime: 
            filtro.remove(i)
 
        while len(minterms) > 0:
             max = 0
-            nextTerm = 0
+            proxTermo = 0
             for i in filtro:
                 cont = 0
                 for j in i[0]:
@@ -335,16 +328,14 @@ def main():
                         cont += 1
                     if cont > max:
                         max = cont
-                        nextTerm = i
-            filtro.remove(nextTerm)
-            chosen.append(nextTerm)
-            for b in nextTerm[0]:
+                        proxTermo = i
+            filtro.remove(proxTermo)
+            essentialPrime.append(proxTermo)
+            for b in proxTermo[0]:
                 if b in minterms: minterms.remove(b)
             
-       for i in chosen:
-           epi.append(i[1])
-
-
+       for i in essentialPrime:
+           epi.append(i[1]) #insere na lista os primos necessarios para a simplicacao
 
        solucao = ""
        solucao += binario_para_equacao(epi[0])
@@ -370,12 +361,11 @@ def main():
        grupos = agrupaUns(aux,nMint-1)
        print("Agrupamento:",grupos)
 
-       #ep = ['0000_','0_01','011_']
        solucao = ""
        solucao += binario_para_equacao(epi[0])
        for x in range(1,len(epi)):
            solucao += " + " + binario_para_equacao(epi[x])
-       print(solucao)
+       print("Saida: ", solucao, " / ", nLiterais, "Literais")
 
 
     elif op == "3":
