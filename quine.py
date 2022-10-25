@@ -5,9 +5,6 @@
 
 
 # Lists
-from cmath import exp
-
-
 vBin = []
 tabelaV = []
 epi = []
