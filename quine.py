@@ -5,6 +5,9 @@
 
 
 # Lists
+from cmath import exp
+
+
 vBin = []
 tabelaV = []
 epi = []
@@ -34,42 +37,6 @@ def listaMintermos(vBin,tam,aux):
     for i in range(0,tam):
         mintermo_lista.append(bin2dec(aux[i]))
     return mintermo_lista
-
-# Agrupa pelo numero de 1's
-def agrupaUns(binario, nVar):
-    grupo0 = [] 
-    grupo1 = []
-    grupo2 = []
-    grupo3 = []
-    grupo4 = []
-
-    for b in binario:
-        cont = 0
-        for digito in b:
-            if digito == '1':
-                cont +=1
-        if cont == 0:
-            grupo0.append(b)
-        if cont == 1:
-            grupo1.append(b)
-        if cont == 2:
-            grupo2.append(b)
-        if cont == 3:
-            grupo3.append(b)
-        if cont == 4:
-            grupo4.append(b)
-
-    grupo = {}
-
-    if nVar == 1:
-        grupo = {0: grupo0, 1: grupo1}
-    if nVar == 2:
-        grupo = {0: grupo0, 1: grupo1, 2: grupo2}
-    if nVar == 3:
-        grupo = {0: grupo0, 1: grupo1, 2: grupo2, 3: grupo3}
-    if nVar == 4:
-        grupo = {0: grupo0, 1: grupo1, 2: grupo2, 3: grupo3, 4: grupo4}
-    return grupo
 
 # Converte entrada no formato de soma de produto para binario
 def entradaSOP(entrada):
@@ -186,29 +153,38 @@ def main():
        #vBin.append(aux)
        print("Equação em binario:\n",aux)
        nMint = len(aux) #numero de mintermos
-       #print(nMint)
        minterms = listaMintermos(vBin,nMint,aux)
        print("Mintermos:\n",minterms)
-       grupos = agrupaUns(aux,4)
-       print("Agrupamento:\n",grupos)
-       
        n = nMint-1
 
+       # Cria lista para armazena as expressoes agrupadas pelo numero de 1's
        group1 = []
        for i in range(n+1):
            group1.append([])
        
-       #agrupa pelo numero de 1's
        for i in aux:
            group1[i.count('1')].append(i)  
 
-      #print('group1:\n',group1)    
+       for i in group1:
+           if i == []:
+              group1.remove([]) # remove o que nao é usado     
 
-       minBin = []
-       minBin2 = []
-       group2 = []
-       primos = []
+       #print('Searching for primes:\n',group1) 
+       print('Searching for primes')
+       print('Column 0')
+       print('Group 0:',group1[0])
+       print('Group 1:',group1[1])
+       print('Group 2:',group1[2])
+       print('Group 3:',group1[3])
 
+       ##########################################################################   
+       #Covering table
+       ##########################################################################
+       group2 = [] #armazena primos e mintermos que 
+       primos = [] #armazena primos implicantes
+       minBin = [] #armazena mintermos e sua representação binaria
+       minBin2 = [] #armazena mintermos e binario ordenado
+       numPrimos = 0
 
        for i in range(n):
            group2.append([])
@@ -224,24 +200,27 @@ def main():
                         if i not in minBin2: minBin2.append([bin2dec(i),i])
                         if j not in minBin2: minBin2.append([bin2dec(i),i])
                         primos.append(geraPrimos(i,j))
+                        numPrimos+=1
                         group2[group1.index(group)].append([[bin2dec(i), bin2dec(j)], geraPrimos(i,j)])
        
-       #print('primos:',primos)
-       #print('group1:',group1) agrupamento por 1's
-       #print('group2:',group2) #mintemos x primos implicantes
        for i in group2: 
           if i == []:
             group2.remove([])
+       
+       print('\nColumn 1')
+       for i in range(numPrimos):
+         print('Group',i, ':', primos[i])
 
-      # print(group2)
-      
-       print('Tabela de Cobertura (Mintermos x Primos Implicantes):') 
+       print('Covering Table (Prime and the minterms they cover):')
        for i in group2:
            print(i)
 
+       ############################################################## 
+       # Minimal set of primes (selected primes)
+       ##############################################################
        selectedPrimes(minBin,minBin2)
        
-       while True:  #Gera implicantes primos essenciais
+       while True:  
             if len(group2) == 1:
                 for i in group2[0]:
                     selected_primes.append(i)
@@ -268,10 +247,9 @@ def main():
 
             for i in group2:
                 if i == []:
-                    group2.remove([])
+                    group2.remove([]) #remove o que nao eh usado
             
             selectedPrimes(minBin,minBin2)
-           # print(selected_primes)
             if len(group2) == 0:
                 break
             if len(group2[0]) == 0:
@@ -279,49 +257,45 @@ def main():
             if len(group2[0]) != 0 and len(group2)==1:
                 selectedPrimes.append(group2[0][0])
                 break
-           # print(selectedPrimes)
 
-       filtro = []
+       tabCobertura = []
 
        for i in selected_primes:
            x = i[0]
            if type(x) is list:
               x.sort() #ordena lista
-           y = [x,i[1]]
-           if y not in filtro:
-              filtro.append(y)
-
+           y = [x,i[1]] #armazena a covering table
+           if y not in tabCobertura:
+              tabCobertura.append(y)
 
        lista1 = minterms.copy() 
-       lista2 = filtro.copy()  
+       lista2 = tabCobertura.copy()  
        for i in lista2:
            if type(i[0]) is int:
-                filtro[lista2.index(i)][0] = [filtro[lista2.index(i)][0]]
-
+                tabCobertura[lista2.index(i)][0] = [tabCobertura[lista2.index(i)][0]]
 
        essentialPrime = []
-
        for i in lista1:
            cont = 0
-           eq = []
-           for j in filtro:
+           expr = []
+           for j in tabCobertura:
                if i in j[0]:
                   cont+=1
-                  eq.append(j)
+                  expr.append(j)
            if cont==1:
-              if eq[0] not in essentialPrime: essentialPrime.append(eq[0])
+              if expr[0] not in essentialPrime: essentialPrime.append(expr[0])
               
-              for a in eq[0][0]:
+              for a in expr[0][0]:
                   if a in minterms: minterms.remove(a)
 
        print('Essential Prime:',essentialPrime)
        for i in essentialPrime: 
-           filtro.remove(i)
+           tabCobertura.remove(i)
 
        while len(minterms) > 0:
             max = 0
             proxTermo = 0
-            for i in filtro:
+            for i in tabCobertura:
                 cont = 0
                 for j in i[0]:
                     if j in minterms:
@@ -329,7 +303,7 @@ def main():
                     if cont > max:
                         max = cont
                         proxTermo = i
-            filtro.remove(proxTermo)
+            tabCobertura.remove(proxTermo)
             essentialPrime.append(proxTermo)
             for b in proxTermo[0]:
                 if b in minterms: minterms.remove(b)
@@ -345,7 +319,6 @@ def main():
 
        print("Saida: ",solucao," / ", nLiterais,"Literais")
 
-
     elif op == "2":
        print("Digite a tabela verdade da equação separando cada linha por um espaço:")
        entradaBin = input()
@@ -353,14 +326,153 @@ def main():
        for i,b in enumerate(entradaBin):
            if b == ' ':
               aux = entradaBin.split()
-
        tabelaV.append(aux)
        tam = len(aux)
        minterms =  listaMintermos(tabelaV,tam,aux)
        print("Mintermos:",minterms) 
-       grupos = agrupaUns(aux,nMint-1)
-       print("Agrupamento:",grupos)
+       n=tam-1
 
+       # cria lista group1 para armazenar as expressoes agrupada pelo numero de 1's
+       group1 = []
+       for i in range(n+1):
+           group1.append([])
+
+       for i in aux:
+           group1[i.count('1')].append(i) 
+
+       for i in group1:   
+           if i == []: 
+              group1.remove([]) #remove o que nao é usado
+
+       print('Searching for primes\n',group1)
+
+      ######################################################################
+      #Covering table
+      ######################################################################
+       group2 = [] #armazena primos e mintermos que eles cobrem
+       primos = [] #primos implicantes
+       minBin = [] #armazena mintermos e sua respectiva representacao binaria
+       minBin2 = [] #armazena mintermos e o binario de forma ordenada
+
+       for i in range(n):
+           group2.append([])
+
+       for group in group1[:-1]:
+            for i in group:
+                if i not in minBin: minBin.append([bin2dec(i),i]) #insere na lista mintermo e o binario
+                for j in group1[group1.index(group)+1]:
+                    if j not in minBin:minBin.append([bin2dec(j),j])
+                    if bin2dec(i) > bin2dec(j):
+                        continue
+                    elif compara_strings(i,j): 
+                        if i not in minBin2: minBin2.append([bin2dec(i),i])
+                        if j not in minBin2: minBin2.append([bin2dec(j),j])
+                        primos.append(geraPrimos(i,j))
+                        group2[group1.index(group)].append([[bin2dec(i), bin2dec(j)], geraPrimos(i,j)]) #insere na lista os primos e mintermos que eles cobrem
+       
+       for i in group2:
+          if i == []:
+            group2.remove([]) #remove o que nao é usado
+       
+       print("Covering Table (Prime and the minterms they cover):")
+       for i in group2:
+           print(i)
+       ######################################################################
+       # Minimal set of primes (selected primes)
+       ######################################################################
+       selectedPrimes(minBin,minBin2)
+
+       while True:
+          if len(group2) == 1:
+            for i in group2[0]:
+                selected_primes.append(i)
+            break
+          
+          group1 = group2
+          group2 = []
+          minBin = []
+          minBin2 = []
+
+          for i in range(len(group1)-1):
+              group2.append([])
+          
+          for i in group1[:-1]:
+            for j in i:
+                if j[-1] not in minBin:minBin.append(j)
+                for k in group1[group1.index(i) + 1]:
+                    if k[-1] not in minBin:minBin.append(k)
+                    if compara_strings(j[-1],k[-1]):
+                        if j[-1] not in minBin2:minBin2.append(j)
+                        if k[-1] not in minBin2:minBin2.append(k)
+                        group2[group1.index(i)].append([j[0] + k[0], geraPrimos(j[-1],k[-1])])
+                          
+          for i in group2:
+            if i == []:
+              group2.remove([])
+
+          selectedPrimes(minBin,minBin2)
+          if len(group2) == 0:
+             break
+          if len(group[0]) == 0:
+            break
+          if len(group2[0]) != 0 and len(group2)==1:
+             selectedPrimes.append(group2[0][0])
+             break
+            
+       tabCobertura = []
+       for i in selected_primes:
+           x = i[0]
+           if type(x) is list:
+               x.sort()
+           y = [x,i[1]] #armazena a covering table 
+           if y not in tabCobertura:
+              tabCobertura.append(y)  
+        
+       lista1 = minterms.copy()
+       lista2 = tabCobertura.copy()
+       for i in lista2:
+           if type(i[0]) is int:
+              tabCobertura[lista2.index(i)][0] = [tabCobertura[lista2.index(i)][0]]
+             
+        #print('tab:',tabCobertura)
+            
+       essentialPrime = []
+
+       for i in lista1:
+           cont = 0
+           expr = []
+           for j in tabCobertura:
+              if i in j[0]:
+                 cont+=1
+                 expr.append(j)
+           if cont == 1:
+              if expr[0] not in essentialPrime: essentialPrime.append(expr[0])
+              for a in expr[0][0]:
+                  if a in minterms: minterms.remove(a)
+
+       print('Essential Prime:',essentialPrime) 
+       for i in essentialPrime:
+          tabCobertura.remove(i)
+
+       while len(minterms) > 0:
+            max = 0
+            proxTerm = 0
+            for i in tabCobertura:
+                cont = 0
+                for j in i[0]:
+                    if j in minterms:
+                        cont += 1
+                    if cont > max:
+                        max = cont
+                        proxTerm = i
+            tabCobertura.remove(proxTerm)
+            essentialPrime.append(proxTerm)
+            for b in proxTerm[0]:
+                if b in minterms: minterms.remove(b) 
+
+       for i in essentialPrime:
+           epi.append(i[1])
+          
        solucao = ""
        solucao += binario_para_equacao(epi[0])
        for x in range(1,len(epi)):
