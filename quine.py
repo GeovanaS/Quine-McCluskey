@@ -152,7 +152,7 @@ def main():
        nMint = len(aux) #numero de mintermos
        minterms = listaMintermos(vBin,nMint,aux)
        print("Mintermos:\n",minterms)
-       n = nMint-1
+       n = nMint
 
        # Cria lista para armazena as expressoes agrupadas pelo numero de 1's
        group1 = []
@@ -183,12 +183,13 @@ def main():
        minBin2 = [] #armazena mintermos e binario ordenado
        numPrimos = 0
 
-       for i in range(n):
+       for i in range(n+1):
            group2.append([])
 
        for group in group1[:-1]:
            for i in group:
                if i not in minBin:minBin.append([bin2dec(i),i])
+               print('i:',i)
                for j in group1[group1.index(group)+1]:
                    if j not in minBin:minBin.append([bin2dec(j),j])
                    if bin2dec(i) > bin2dec(j):
@@ -271,18 +272,19 @@ def main():
            if type(i[0]) is int:
                 tabCobertura[lista2.index(i)][0] = [tabCobertura[lista2.index(i)][0]]
 
+
        essentialPrime = []
        for i in lista1:
            cont = 0
-           expr = []
+           exp = []
            for j in tabCobertura:
                if i in j[0]:
                   cont+=1
-                  expr.append(j)
+                  exp.append(j)
            if cont==1:
-              if expr[0] not in essentialPrime: essentialPrime.append(expr[0])
+              if exp[0] not in essentialPrime: essentialPrime.append(exp[0])
               
-              for a in expr[0][0]:
+              for a in exp[0][0]:
                   if a in minterms: minterms.remove(a)
 
        print('Essential Prime:',essentialPrime)
@@ -327,7 +329,7 @@ def main():
        tam = len(aux)
        minterms =  listaMintermos(tabelaV,tam,aux)
        print("Mintermos:",minterms) 
-       n=tam-1
+       n=tam
 
        # cria lista group1 para armazenar as expressoes agrupada pelo numero de 1's
        group1 = []
@@ -437,14 +439,14 @@ def main():
 
        for i in lista1:
            cont = 0
-           expr = []
+           exp = []
            for j in tabCobertura:
               if i in j[0]:
                  cont+=1
-                 expr.append(j)
+                 exp.append(j)
            if cont == 1:
-              if expr[0] not in essentialPrime: essentialPrime.append(expr[0])
-              for a in expr[0][0]:
+              if exp[0] not in essentialPrime: essentialPrime.append(exp[0])
+              for a in exp[0][0]:
                   if a in minterms: minterms.remove(a)
 
        print('Essential Prime:',essentialPrime) 
