@@ -189,7 +189,6 @@ def main():
        for group in group1[:-1]:
            for i in group:
                if i not in minBin:minBin.append([bin2dec(i),i])
-               print('i:',i)
                for j in group1[group1.index(group)+1]:
                    if j not in minBin:minBin.append([bin2dec(j),j])
                    if bin2dec(i) > bin2dec(j):
@@ -375,7 +374,8 @@ def main():
        
        print("Covering Table (Prime and the minterms they cover):")
        for i in group2:
-           print(i)
+           if i != []:
+              print(i)
        ######################################################################
        # Minimal set of primes (selected primes)
        ######################################################################
