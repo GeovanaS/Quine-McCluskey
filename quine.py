@@ -7,8 +7,6 @@
 #Exemplos de entradas:
 #!A*!B*!C*!D + !A*!B*!C*D + !A*B*!C*D + !A*B*C*!D + !A*B*C*D
 #!A*B*!C*D + !A*B*C*!D + !A*B*C*D + A*!B*!C*D + A*!B*C*!D
-#!A*B*!C*D+!A*B*C*!D+!A*B*C*D+A*!B*!C*D+A*!B*C*!D+A*!B*C*D+A*B*!C*D+A*B*!C*D
-
 
 vBin = []
 tabelaV = []
@@ -32,10 +30,10 @@ def bin2dec(vBin):
         soma = int(soma/2)    
     return soma
 
-# Funcao auxiliar para remover elementos duplicados
-def remove_duplicados(l): 
-    return list(set(l))
 
+# funcao auxiliar para remover elementos duplicados
+def remove_duplicates(l):
+    return list(set(l))    
 
 # Lista os mintermos da equacao
 def listaMintermos(vBin,tam,aux):
@@ -43,7 +41,7 @@ def listaMintermos(vBin,tam,aux):
     mintermo_lista = []
     for i in range(0,tam):
         mintermo_lista.append(bin2dec(aux[i]))
-        mintermo_lista=remove_duplicados(mintermo_lista)
+        mintermo_lista=remove_duplicates(mintermo_lista)
     return mintermo_lista
 
 # Converte entrada no formato de soma de produto para binario
@@ -159,15 +157,15 @@ def main():
        print("Digite a equação no formato SOP:")  
        entrada = input() #le a entrada do usuario
        aux = entradaSOP(entrada) # armazena a expressao em binario
+       binario = remove_duplicates(aux)
        #vBin.append(aux)
-       aux=remove_duplicados(aux)
-       print("Equação em binario:\n",aux)
+       print("Equação em binario:\n",binario)
        nMint = len(aux) #numero de mintermos
        minterms = listaMintermos(vBin,nMint,aux)
        print("Mintermos:\n",minterms)
 
        mintermos = listaMintermos(vBin,nMint,aux)
-
+       
        n = nMint
 
        # Cria lista para armazena as expressoes agrupadas pelo numero de 1's
@@ -180,15 +178,16 @@ def main():
 
        for i in group1:
            if i == []:
-              group1.remove([]) # remove o que nao é usado     
+              group1.remove(i) # remove o que nao é usado     
 
        #print('Searching for primes:\n',group1) 
        print('Searching for primes')
        print('Column 0')
-       print('Group 0:',group1[0])
-       print('Group 1:',group1[1])
-       print('Group 2:',group1[2])
-       print('Group 3:',group1[3])
+       print(group1)
+       #print('Group 0:',group1[0])
+       #print('Group 1:',group1[1])
+       #print('Group 2:',group1[2])
+       #print('Group 3:',group1[3])
 
        ##########################################################################   
        #Covering table
@@ -220,13 +219,13 @@ def main():
           if i == []:
             group2.remove([])
        
-       #print('Column 1')
-       #for i in range(numPrimos):
-        # print('Group',i, ':', primos[i])
+       print('Column 1')
+       for i in range(numPrimos):
+         print(primos[i])
 
        print('Covering Table (Prime and the minterms they cover):')
        for i in group2:
-         if i != []:
+         if i != []: 
            print(i)
 
        ############################################################## 
@@ -301,7 +300,6 @@ def main():
               for a in exp[0][0]:
                   if a in minterms: minterms.remove(a)
        
-      #print('Essential Prime:',essentialPrime)
        for i in essentialPrime: 
            tabCobertura.remove(i)
        
@@ -310,14 +308,14 @@ def main():
            print(i[1])
 
        while len(minterms) > 0:
-            tam = len(minterms)
+            tam = 0
             proxTermo = 0
             for i in tabCobertura:
-                cont = 1
+                cont = 0
                 for j in i[0]:
                     if j in minterms:
                         cont += 1
-                if cont >= tam:
+                if cont > tam:
                     tam = cont
                     proxTermo = i
             tabCobertura.remove(proxTermo)
@@ -326,7 +324,7 @@ def main():
                 if b in minterms: minterms.remove(b)
 
        epi=[]
-       #print('Essential:',essentialPrime)     
+       #print('Essential Prime:',essentialPrime)     
        for i in essentialPrime:
              epi.append(i[1]) #insere na lista os primos necessarios para a simplicacao
        
