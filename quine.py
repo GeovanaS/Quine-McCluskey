@@ -192,7 +192,7 @@ def main():
        ##########################################################################   
        #Covering table
        ##########################################################################
-       group2 = [] #armazena primos e mintermos que 
+       group2 = [] #armazena primos e mintermos que eles cobrem
        primos = [] #armazena primos implicantes
        minBin = [] #armazena mintermos e sua representação binaria
        minBin2 = [] #armazena mintermos e binario ordenado
