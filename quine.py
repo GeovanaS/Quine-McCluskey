@@ -1,10 +1,15 @@
 # Trabalho 1 - Ferramenta de CAD 
+
+# Geovana Silva da Silveira
+
 # Algoritmo de Quine-McCluskey para solucionar mapas de Karnaugh de 4 variaveis
 
-#Exemplo entrada: !A*!B*!C*!D + !A*!B*!C*D + !A*B*!C*D + !A*B*C*!D + !A*B*C*D
+#Exemplos de entradas:
+#!A*!B*!C*!D + !A*!B*!C*D + !A*B*!C*D + !A*B*C*!D + !A*B*C*D
+#!A*B*!C*D + !A*B*C*!D + !A*B*C*D + A*!B*!C*D + A*!B*C*!D
+#!A*B*!C*D+!A*B*C*!D+!A*B*C*D+A*!B*!C*D+A*!B*C*!D+A*!B*C*D+A*B*!C*D+A*B*!C*D
 
 
-# Lists
 vBin = []
 tabelaV = []
 epi = []
@@ -27,12 +32,18 @@ def bin2dec(vBin):
         soma = int(soma/2)    
     return soma
 
+# Funcao auxiliar para remover elementos duplicados
+def remove_duplicados(l): 
+    return list(set(l))
+
+
 # Lista os mintermos da equacao
 def listaMintermos(vBin,tam,aux):
     i=0
     mintermo_lista = []
     for i in range(0,tam):
         mintermo_lista.append(bin2dec(aux[i]))
+        mintermo_lista=remove_duplicados(mintermo_lista)
     return mintermo_lista
 
 # Converte entrada no formato de soma de produto para binario
@@ -66,6 +77,7 @@ def entradaSOP(entrada):
 def binario_para_equacao(selectedPrimes):
     global nLiterais
     eq = ''
+
     if(selectedPrimes[0]=='1'):
         eq += str("A")
         nLiterais = nLiterais + 1
@@ -148,10 +160,14 @@ def main():
        entrada = input() #le a entrada do usuario
        aux = entradaSOP(entrada) # armazena a expressao em binario
        #vBin.append(aux)
+       aux=remove_duplicados(aux)
        print("Equação em binario:\n",aux)
        nMint = len(aux) #numero de mintermos
        minterms = listaMintermos(vBin,nMint,aux)
        print("Mintermos:\n",minterms)
+
+       mintermos = listaMintermos(vBin,nMint,aux)
+
        n = nMint
 
        # Cria lista para armazena as expressoes agrupadas pelo numero de 1's
@@ -204,12 +220,13 @@ def main():
           if i == []:
             group2.remove([])
        
-       print('\nColumn 1')
-       for i in range(numPrimos):
-         print('Group',i, ':', primos[i])
+       #print('Column 1')
+       #for i in range(numPrimos):
+        # print('Group',i, ':', primos[i])
 
        print('Covering Table (Prime and the minterms they cover):')
        for i in group2:
+         if i != []:
            print(i)
 
        ############################################################## 
@@ -227,7 +244,7 @@ def main():
             group2 = []
             minBin = []
             minBin2 = []
-            
+
             for i in range(len(group1) - 1):
                 group2.append([])
 
@@ -260,17 +277,16 @@ def main():
        for i in selected_primes:
            x = i[0]
            if type(x) is list:
-              x.sort() #ordena lista
+              x.sort() #ordena os mintermos 
            y = [x,i[1]] #armazena a covering table
            if y not in tabCobertura:
               tabCobertura.append(y)
-
+        
        lista1 = minterms.copy() 
        lista2 = tabCobertura.copy()  
-       for i in lista2:
+       for i in lista2: 
            if type(i[0]) is int:
                 tabCobertura[lista2.index(i)][0] = [tabCobertura[lista2.index(i)][0]]
-
 
        essentialPrime = []
        for i in lista1:
@@ -282,38 +298,49 @@ def main():
                   exp.append(j)
            if cont==1:
               if exp[0] not in essentialPrime: essentialPrime.append(exp[0])
-              
               for a in exp[0][0]:
                   if a in minterms: minterms.remove(a)
-
-       print('Essential Prime:',essentialPrime)
+       
+      #print('Essential Prime:',essentialPrime)
        for i in essentialPrime: 
            tabCobertura.remove(i)
+       
+       print('Essential Primes:')
+       for i in essentialPrime:
+           print(i[1])
 
        while len(minterms) > 0:
-            max = 0
+            tam = len(minterms)
             proxTermo = 0
             for i in tabCobertura:
-                cont = 0
+                cont = 1
                 for j in i[0]:
                     if j in minterms:
                         cont += 1
-                    if cont > max:
-                        max = cont
-                        proxTermo = i
+                if cont >= tam:
+                    tam = cont
+                    proxTermo = i
             tabCobertura.remove(proxTermo)
             essentialPrime.append(proxTermo)
             for b in proxTermo[0]:
                 if b in minterms: minterms.remove(b)
-            
+
+       epi=[]
+       #print('Essential:',essentialPrime)     
        for i in essentialPrime:
-           epi.append(i[1]) #insere na lista os primos necessarios para a simplicacao
+             epi.append(i[1]) #insere na lista os primos necessarios para a simplicacao
+       
+
+       print('Essential Prime Implicants:\n',epi)
+
+       setPrimos = []
+       for i in epi:
+            setPrimos.append(i)     
 
        solucao = ""
-       solucao += binario_para_equacao(epi[0])
-       
-       for x in range(1,len(epi)):
-           solucao += " + " + binario_para_equacao(epi[x])
+       solucao += binario_para_equacao(setPrimos[0])
+       for x in range(1,len(setPrimos)):
+           solucao += " + " + binario_para_equacao(setPrimos[x])
 
        print("Saida: ",solucao," / ", nLiterais,"Literais")
 
@@ -374,8 +401,7 @@ def main():
        
        print("Covering Table (Prime and the minterms they cover):")
        for i in group2:
-           if i != []:
-              print(i)
+           print(i)
        ######################################################################
        # Minimal set of primes (selected primes)
        ######################################################################
